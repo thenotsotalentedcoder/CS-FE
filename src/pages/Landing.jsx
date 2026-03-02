@@ -381,8 +381,8 @@ const STEPS = [
     body: 'Tasks come with deadlines and optional reference material. You know exactly what to build and when.',
   },
   {
-    title: 'You submit a GitHub repo',
-    body: 'When done, paste your GitHub repo link. One submission per task — so make it count.',
+    title: 'You submit your Github repo',
+    body: 'When done, push changes in your repo and repo link. Submit it through the platform to notify admin it’s ready for review.',
   },
   {
     title: 'Feedback comes back to you',
