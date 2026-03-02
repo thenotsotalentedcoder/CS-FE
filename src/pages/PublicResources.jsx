@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api from '../lib/api.js';
+import { useAuth } from '../hooks/useAuth.jsx';
 
 const TYPES = ['all', 'youtube', 'documentation', 'repository'];
 const CATEGORIES = ['all', 'web dev', 'essentials', 'ai', 'misc'];
@@ -30,6 +31,7 @@ const staggerItem = {
 };
 
 export default function PublicResources() {
+  const { user } = useAuth();
   const [resources, setResources] = useState([]);
   const [typeFilter, setTypeFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -68,7 +70,13 @@ export default function PublicResources() {
         <Link to="/" className="font-heading font-bold text-base tracking-tight text-white focus-ring rounded">
           Cold<span className="text-accent">Start</span>
         </Link>
-        <Link to="/login" className="btn-secondary text-sm">Sign in</Link>
+        {user ? (
+          <Link to={user.role === 'admin' ? '/admin' : '/dashboard'} className="btn-secondary text-sm">
+            Go to dashboard
+          </Link>
+        ) : (
+          <Link to="/login" className="btn-secondary text-sm">Sign in</Link>
+        )}
       </motion.header>
 
       {/* Main — offset for fixed navbar */}

@@ -65,7 +65,7 @@ export default function ResetPassword() {
           {done ? (
             <div className="text-center space-y-3">
               <p className="font-heading font-bold text-2xl text-white">Password updated</p>
-              <p className="text-zinc-500 font-body text-sm">Redirecting you to sign in…</p>
+              <p className="text-zinc-500 font-body text-sm">Redirecting...</p>
             </div>
           ) : !validSession ? (
             <div className="text-center space-y-4">

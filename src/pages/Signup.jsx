@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api from '../lib/api.js';
+import { supabase } from '../lib/supabaseClient.js';
 
 const STEP = { EMAIL: 'email', DETAILS: 'details', DONE: 'done' };
 
@@ -64,7 +65,18 @@ export default function Signup() {
         full_name: fullName.trim(),
       });
 
-      setStep(STEP.DONE);
+      // Auto sign in and go straight to dashboard
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
+
+      if (signInError) {
+        // Sign-in failed for some reason — fall back to done screen
+        setStep(STEP.DONE);
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     } catch (err) {
       setError(err.response?.data?.error || 'Account creation failed. Please try again.');
     } finally {
