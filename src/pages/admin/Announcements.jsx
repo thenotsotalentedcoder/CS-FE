@@ -5,6 +5,29 @@ import api from '../../lib/api.js';
 
 const EMPTY = { title: '', body: '', target_group: 'all' };
 
+const GROUP_STYLE = {
+  all: {
+    card: 'border-l-2 border-l-accent bg-accent/[0.03]',
+    badge: 'text-accent bg-accent/10 border-accent/20',
+    label: 'All groups',
+  },
+  A: {
+    card: 'border-l-2 border-l-blue-500 bg-blue-500/[0.03]',
+    badge: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+    label: 'Group A',
+  },
+  B: {
+    card: 'border-l-2 border-l-amber-500 bg-amber-500/[0.03]',
+    badge: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+    label: 'Group B',
+  },
+  C: {
+    card: 'border-l-2 border-l-purple-500 bg-purple-500/[0.03]',
+    badge: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
+    label: 'Group C',
+  },
+};
+
 export default function AdminAnnouncements() {
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -88,17 +111,19 @@ export default function AdminAnnouncements() {
         </div>
       ) : (
         <div className="space-y-3">
-          {announcements.map((a, i) => (
+          {announcements.map((a, i) => {
+            const gs = GROUP_STYLE[a.target_group] || GROUP_STYLE.all;
+            return (
             <div
               key={a.id}
-              className="card animate-fade-up"
+              className={`card animate-fade-up ${gs.card}`}
               style={{ animationDelay: `${i * 50}ms` }}
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <h3 className="font-heading font-semibold text-white text-sm">{a.title}</h3>
-                    <GroupBadge group={a.target_group} />
+                    <GroupBadge group={a.target_group} gs={gs} />
                   </div>
                   <p className="text-zinc-500 font-body text-sm leading-relaxed mb-2 line-clamp-3">{a.body}</p>
                   <p className="text-zinc-700 text-xs font-body">
@@ -126,7 +151,8 @@ export default function AdminAnnouncements() {
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -186,10 +212,11 @@ export default function AdminAnnouncements() {
   );
 }
 
-function GroupBadge({ group }) {
+function GroupBadge({ group, gs }) {
+  const style = gs || GROUP_STYLE[group] || GROUP_STYLE.all;
   return (
-    <span className="badge badge-not-submitted">
-      {group === 'all' ? 'All groups' : `Group ${group}`}
+    <span className={`badge border ${style.badge}`}>
+      {style.label}
     </span>
   );
 }

@@ -62,7 +62,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
           <NavItems navItems={navItems} onClose={() => {}} />
         </nav>
         <div className="px-4 py-3 border-t border-border">
-          <p className="text-zinc-700 text-xs font-body">ColdStart v1.0</p>
+          <p className="text-zinc-700 text-xs font-body">ColdStart beta</p>
         </div>
       </aside>
 
@@ -105,7 +105,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
                 <NavItems navItems={navItems} onClose={onMobileClose} />
               </nav>
               <div className="px-4 py-3 border-t border-border">
-                <p className="text-zinc-700 text-xs font-body">ColdStart v1.0</p>
+                <p className="text-zinc-700 text-xs font-body">ColdStart beta</p>
               </div>
             </motion.aside>
           </>
