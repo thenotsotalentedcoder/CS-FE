@@ -9,6 +9,7 @@ import Landing from './pages/Landing.jsx';
 import PublicResources from './pages/PublicResources.jsx';
 import Login from './pages/Login.jsx';
 import Signup from './pages/Signup.jsx';
+import ResetPassword from './pages/ResetPassword.jsx';
 
 // Student pages
 import StudentDashboard from './pages/student/Dashboard.jsx';
@@ -39,6 +40,7 @@ export default function App() {
           <Route path="/resources" element={<PublicResources />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* Student */}
           <Route path="/dashboard" element={<ProtectedRoute><StudentDashboard /></ProtectedRoute>} />
