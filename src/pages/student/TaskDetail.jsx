@@ -104,7 +104,7 @@ export default function StudentTaskDetail() {
             <img
               src={task.reference_image_url}
               alt="Task reference"
-              className="w-full max-h-72 object-cover rounded-lg border border-border"
+              className="w-full object-contain rounded-lg border border-border"
             />
           </div>
         )}
@@ -206,7 +206,7 @@ export default function StudentTaskDetail() {
                     <img
                       src={submission.feedback_image_url}
                       alt="Feedback attachment"
-                      className="w-full max-h-64 object-cover rounded-md border border-border mt-3"
+                      className="w-full object-contain rounded-md border border-border mt-3"
                     />
                   )}
                   <p className="text-zinc-700 text-xs font-body mt-3">
