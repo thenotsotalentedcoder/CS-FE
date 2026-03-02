@@ -2,9 +2,12 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Navbar from './Navbar.jsx';
 import Sidebar from './Sidebar.jsx';
+import KernelButton from '../chat/KernelButton.jsx';
+import { useAuth } from '../../hooks/useAuth.jsx';
 
 export default function AppLayout({ children }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, isStudent } = useAuth();
 
   return (
     <div className="min-h-screen bg-black">
@@ -24,6 +27,9 @@ export default function AppLayout({ children }) {
           {children}
         </motion.div>
       </main>
+
+      {/* Kernel — only for students with an assigned group */}
+      {isStudent && user?.group && <KernelButton />}
     </div>
   );
 }

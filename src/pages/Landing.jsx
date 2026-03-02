@@ -257,6 +257,132 @@ export default function Landing() {
 
       <div className="border-t border-white/5" />
 
+      {/* Kernel */}
+      <section className="py-28 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+
+            {/* Left: label + copy */}
+            <motion.div
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: '-80px' }}
+              variants={fadeUp}
+              custom={0}
+            >
+              <p className="font-body text-xs tracking-[0.2em] uppercase text-zinc-600 mb-4">
+                AI Assistant
+              </p>
+              <h2
+                className="font-heading font-bold text-white leading-tight mb-6"
+                style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)' }}
+              >
+                Meet<br />
+                <span className="text-accent">Kernel.</span>
+              </h2>
+              <p className="text-zinc-400 font-body text-sm leading-relaxed max-w-sm">
+                Ask it anything. It already knows your tasks, deadlines, and where you're at.
+              </p>
+            </motion.div>
+
+            {/* Right: fake chat window */}
+            <motion.div
+              initial={{ opacity: 0, y: 32 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-60px' }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+            >
+              <div
+                className="rounded-2xl overflow-hidden"
+                style={{
+                  background: 'rgba(0,0,0,0.7)',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(34,197,94,0.18)',
+                  boxShadow: '0 0 60px rgba(34,197,94,0.06), 0 24px 64px rgba(0,0,0,0.5)',
+                }}
+              >
+                {/* Window chrome */}
+                <div
+                  className="flex items-center justify-between px-4 py-3 border-b"
+                  style={{ borderColor: 'rgba(34,197,94,0.12)' }}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div
+                      className="w-7 h-7 rounded-full bg-accent/15 border border-accent/35 flex items-center justify-center text-accent text-xs font-heading font-bold"
+                      style={{ boxShadow: '0 0 12px rgba(34,197,94,0.3)' }}
+                    >
+                      K
+                    </div>
+                    <div>
+                      <p className="text-white text-sm font-heading font-semibold leading-none">Kernel</p>
+                      <p className="text-accent text-xs font-body mt-0.5 leading-none" style={{ textShadow: '0 0 8px rgba(34,197,94,0.5)' }}>
+                        AI Assistant
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-white/10" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-white/10" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-white/10" />
+                  </div>
+                </div>
+
+                {/* Messages */}
+                <div className="px-4 py-5 space-y-4">
+                  {KERNEL_DEMO.map((msg, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 8 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: 0.2 + i * 0.12 }}
+                      className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                    >
+                      {msg.role === 'assistant' && (
+                        <div
+                          className="w-5 h-5 rounded-full bg-accent/20 border border-accent/35 flex items-center justify-center text-accent text-[10px] font-heading font-bold mr-2 mt-1 shrink-0"
+                          style={{ boxShadow: '0 0 6px rgba(34,197,94,0.3)' }}
+                        >
+                          K
+                        </div>
+                      )}
+                      <div
+                        className={`max-w-[80%] px-3.5 py-2.5 rounded-2xl text-xs font-body leading-relaxed
+                          ${msg.role === 'user'
+                            ? 'bg-accent text-black font-medium rounded-br-sm'
+                            : 'bg-white/5 border border-white/8 text-zinc-300 rounded-bl-sm'
+                          }`}
+                      >
+                        {msg.content}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Input bar */}
+                <div
+                  className="flex items-center gap-2 px-4 py-3 border-t"
+                  style={{ borderColor: 'rgba(34,197,94,0.08)' }}
+                >
+                  <div className="flex-1 bg-white/5 border border-white/8 rounded-xl px-3.5 py-2 text-xs text-zinc-600 font-body">
+                    Ask Kernel anything...
+                  </div>
+                  <div className="w-7 h-7 rounded-xl bg-accent/20 flex items-center justify-center shrink-0">
+                    <svg className="w-3.5 h-3.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+          </div>
+        </div>
+      </section>
+
+      <div className="border-t border-white/5" />
+
       {/* Public resources preview */}
       <section className="py-28 px-6">
         <div className="max-w-7xl mx-auto">
@@ -305,11 +431,10 @@ export default function Landing() {
   );
 }
 
-const TYPE_LABELS = { youtube: 'YouTube', docs: 'Docs', repo: 'Repo' };
-const TYPE_COLORS = {
-  youtube: 'text-red-400',
-  docs: 'text-blue-400',
-  repo: 'text-zinc-400',
+const TYPE_META = {
+  youtube:       { label: 'YouTube', color: 'text-red-400',    bar: 'bg-red-500' },
+  documentation: { label: 'Docs',    color: 'text-blue-400',   bar: 'bg-blue-500' },
+  repository:    { label: 'Repo',    color: 'text-purple-400', bar: 'bg-purple-500' },
 };
 
 function ResourcesPreview() {
@@ -325,9 +450,9 @@ function ResourcesPreview() {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-white/5 border border-white/5 rounded-lg overflow-hidden">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="bg-black p-6 space-y-3">
+          <div key={i} className="rounded-xl p-5 space-y-3" style={{ background: 'rgba(255,255,255,0.02)' }}>
             <div className="skeleton h-3 w-16" />
             <div className="skeleton h-4 w-3/4" />
           </div>
@@ -338,7 +463,7 @@ function ResourcesPreview() {
 
   if (resources.length === 0) {
     return (
-      <div className="border border-white/5 rounded-lg p-12 text-center">
+      <div className="border border-white/5 rounded-xl p-12 text-center">
         <p className="text-zinc-700 font-body text-sm">No public resources yet.</p>
       </div>
     );
@@ -348,32 +473,44 @@ function ResourcesPreview() {
 
   return (
     <motion.div
-      className={`grid gap-px bg-white/5 border border-white/5 rounded-lg overflow-hidden ${cols}`}
+      className={`grid gap-3 ${cols}`}
       initial="hidden"
       whileInView="show"
       viewport={{ once: true, margin: '-60px' }}
       variants={staggerContainer}
     >
-      {resources.map(r => (
-        <motion.a
-          key={r.id}
-          href={r.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-black p-6 group hover:bg-zinc-950 transition-colors duration-200 cursor-pointer"
-          variants={staggerItem}
-        >
-          <span className={`font-heading font-medium text-xs block mb-2 ${TYPE_COLORS[r.type] ?? 'text-zinc-500'}`}>
-            {TYPE_LABELS[r.type] ?? r.type}
-          </span>
-          <p className="text-zinc-300 group-hover:text-white font-body text-sm leading-snug transition-colors duration-200 line-clamp-2">
-            {r.title}
-          </p>
-        </motion.a>
-      ))}
+      {resources.map(r => {
+        const meta = TYPE_META[r.type] || { label: r.type, color: 'text-zinc-400', bar: 'bg-zinc-600' };
+        return (
+          <motion.a
+            key={r.id}
+            href={r.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative rounded-xl overflow-hidden flex flex-col p-5 gap-2 min-h-[100px] transition-transform duration-200 hover:-translate-y-0.5"
+            style={{ background: 'rgba(255,255,255,0.02)' }}
+            variants={staggerItem}
+          >
+            <div className={`absolute top-0 left-0 right-0 h-[2px] ${meta.bar} opacity-60 group-hover:opacity-100 transition-opacity duration-200`} />
+            <span className={`font-heading font-medium text-xs ${meta.color}`}>
+              {meta.label}
+            </span>
+            <p className="text-zinc-300 group-hover:text-white font-heading font-semibold text-sm leading-snug transition-colors duration-200 line-clamp-2 flex-1">
+              {r.title}
+            </p>
+          </motion.a>
+        );
+      })}
     </motion.div>
   );
 }
+
+const KERNEL_DEMO = [
+  { role: 'user', content: 'My Figma task is due tomorrow. Where do I start?' },
+  { role: 'assistant', content: "Start with a UI kit from Figma Community — search \"food app free\". Use existing components for buttons and cards so you're not building from scratch. Focus on 3 screens max: home, item detail, and cart." },
+  { role: 'user', content: 'Any good resources on Figma?' },
+  { role: 'assistant', content: 'There\'s a Figma Basics video in your resources tab. That\'s your fastest path in.' },
+];
 
 const STEPS = [
   {

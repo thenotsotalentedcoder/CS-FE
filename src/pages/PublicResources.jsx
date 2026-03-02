@@ -8,9 +8,9 @@ const TYPES = ['all', 'youtube', 'documentation', 'repository'];
 const CATEGORIES = ['all', 'web dev', 'essentials', 'ai', 'misc'];
 
 const TYPE_META = {
-  youtube:       { label: 'YouTube', color: 'text-red-400' },
-  documentation: { label: 'Docs',    color: 'text-blue-400' },
-  repository:    { label: 'Repo',    color: 'text-purple-400' },
+  youtube:       { label: 'YouTube',  color: 'text-red-400',    bar: 'bg-red-500',    dim: 'rgba(239,68,68,0.08)' },
+  documentation: { label: 'Docs',     color: 'text-blue-400',   bar: 'bg-blue-500',   dim: 'rgba(59,130,246,0.08)' },
+  repository:    { label: 'Repo',     color: 'text-purple-400', bar: 'bg-purple-500', dim: 'rgba(168,85,247,0.08)' },
 };
 
 const CATEGORY_COLOR = {
@@ -141,9 +141,9 @@ export default function PublicResources() {
         {/* Grid */}
         <div className="py-6">
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-white/5 border border-white/5 rounded-lg overflow-hidden">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-black p-6 space-y-3">
+                <div key={i} className="rounded-xl p-5 space-y-3" style={{ background: 'rgba(255,255,255,0.02)' }}>
                   <div className="skeleton h-3 w-14 rounded" />
                   <div className="skeleton h-4 w-3/4 rounded" />
                   <div className="skeleton h-3 w-1/2 rounded" />
@@ -151,19 +151,19 @@ export default function PublicResources() {
               ))}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="border border-white/5 rounded-lg text-center py-24">
+            <div className="border border-white/5 rounded-xl text-center py-24">
               <p className="text-zinc-700 font-body text-sm">No resources found</p>
             </div>
           ) : (
             <motion.div
-              className={`grid gap-px bg-white/5 border border-white/5 rounded-lg overflow-hidden
-                ${filtered.length === 1 ? 'grid-cols-1 max-w-sm' : filtered.length === 2 ? 'grid-cols-1 sm:grid-cols-2' : filtered.length === 3 ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'}`}
+              className={`grid gap-3
+                ${filtered.length === 1 ? 'grid-cols-1 max-w-sm' : filtered.length === 2 ? 'grid-cols-1 sm:grid-cols-2' : filtered.length === 3 ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'}`}
               variants={staggerContainer}
               initial="hidden"
               animate="show"
             >
               {filtered.map(r => {
-                const meta = TYPE_META[r.type] || { label: r.type, color: 'text-zinc-400' };
+                const meta = TYPE_META[r.type] || { label: r.type, color: 'text-zinc-400', bar: 'bg-zinc-600', dim: 'rgba(255,255,255,0.04)' };
                 return (
                   <motion.a
                     key={r.id}
@@ -171,15 +171,19 @@ export default function PublicResources() {
                     target="_blank"
                     rel="noopener noreferrer"
                     variants={staggerItem}
-                    className="group bg-black hover:bg-zinc-950 transition-colors duration-200 cursor-pointer p-5 sm:p-6 flex flex-col gap-2.5 min-h-[130px]"
+                    className="group relative rounded-xl overflow-hidden flex flex-col p-5 gap-2.5 min-h-[120px] transition-transform duration-200 hover:-translate-y-0.5"
+                    style={{ background: 'rgba(255,255,255,0.02)' }}
                   >
+                    {/* Colored top bar */}
+                    <div className={`absolute top-0 left-0 right-0 h-[2px] ${meta.bar} opacity-60 group-hover:opacity-100 transition-opacity duration-200`} />
+
                     {/* Type + arrow */}
                     <div className="flex items-center justify-between">
                       <span className={`font-heading font-medium text-xs ${meta.color}`}>
                         {meta.label}
                       </span>
                       <svg
-                        className="w-3 h-3 text-zinc-800 group-hover:text-zinc-500 transition-colors duration-200 shrink-0"
+                        className="w-3 h-3 text-zinc-700 group-hover:text-zinc-400 transition-colors duration-200 shrink-0"
                         fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
                         aria-hidden="true"
                       >
@@ -199,7 +203,7 @@ export default function PublicResources() {
                       </p>
                     )}
 
-                    {/* Bottom row: category bottom-right */}
+                    {/* Category */}
                     {r.category && (
                       <div className="flex justify-end mt-auto">
                         <span className={`text-xs font-heading font-medium capitalize ${CATEGORY_COLOR[r.category] ?? 'text-zinc-500'}`}>
