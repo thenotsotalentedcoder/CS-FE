@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import StudentPicker from './StudentPicker.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
+import api from '../../lib/api.js';
 
 const EMPTY = {
   title: '',
@@ -29,6 +30,12 @@ export default function TaskForm({ initial, onSubmit, onCancel, loading }) {
         student_ids: [],
       });
       setImagePreview(initial.reference_image_url || '');
+
+      // Load current assignees for this task
+      api.get(`/api/tasks/${initial.id}`).then(r => {
+        const ids = (r.data.assignments || []).map(a => a.id);
+        setForm(f => ({ ...f, student_ids: ids }));
+      }).catch(() => {});
     } else {
       setForm(EMPTY);
       setImagePreview('');
@@ -57,7 +64,7 @@ export default function TaskForm({ initial, onSubmit, onCancel, loading }) {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    if (!isEdit && form.student_ids.length === 0) {
+    if (form.student_ids.length === 0) {
       alert('Please select at least one student.');
       return;
     }
@@ -182,16 +189,14 @@ export default function TaskForm({ initial, onSubmit, onCancel, loading }) {
         />
       </div>
 
-      {/* Student picker — only on create */}
-      {!isEdit && (
-        <div>
-          <label className="label">Assign to students</label>
-          <StudentPicker
-            selected={form.student_ids}
-            onChange={ids => set('student_ids', ids)}
-          />
-        </div>
-      )}
+      {/* Student picker */}
+      <div>
+        <label className="label">{isEdit ? 'Assigned students' : 'Assign to students'}</label>
+        <StudentPicker
+          selected={form.student_ids}
+          onChange={ids => set('student_ids', ids)}
+        />
+      </div>
 
       <div className="flex gap-3 pt-1">
         <button type="submit" disabled={busy} className="btn-primary flex-1">
