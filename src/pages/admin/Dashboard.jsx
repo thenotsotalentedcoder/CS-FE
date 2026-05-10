@@ -14,13 +14,17 @@ export default function AdminDashboard() {
       .finally(() => setLoading(false));
   }, []);
 
+  const totalStudents = stats ? 
+    Object.values(stats.students_breakdown.webdev).reduce((a, b) => a + b, 0) +
+    Object.values(stats.students_breakdown.ai).reduce((a, b) => a + b, 0) : 0;
+
   return (
     <AppLayout>
       <div className="mb-8 animate-fade-up">
         <p className="text-zinc-500 text-sm font-body mb-1">
           {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
         </p>
-        <h1 className="font-heading font-bold text-3xl text-white">Overview</h1>
+        <h1 className="font-heading font-bold text-3xl text-white">Platform Overview</h1>
       </div>
 
       {loading ? (
@@ -41,35 +45,37 @@ export default function AdminDashboard() {
             <StatCard label="Active tasks" value={stats?.active_tasks ?? 0} accent />
             <StatCard label="Pending review" value={stats?.pending_reviews ?? 0} />
             <StatCard label="Late submissions" value={stats?.late_submissions?.length ?? 0} danger={stats?.late_submissions?.length > 0} />
-            <StatCard
-              label="Total students"
-              value={Object.values(stats?.students_per_group ?? {}).reduce((a, b) => a + b, 0)}
-            />
+            <StatCard label="Total students" value={totalStudents} />
           </div>
 
-          {/* Group breakdown + late submissions */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Group breakdown */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            {/* Web Dev Track */}
             <section className="animate-fade-up delay-150">
-              <h2 className="font-heading font-semibold text-white text-base mb-4">Students by group</h2>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-2 h-6 bg-emerald-500 rounded-full" />
+                <h2 className="font-heading font-semibold text-white text-lg">Web Development</h2>
+              </div>
               <div className="card divide-y divide-border">
-                {['A', 'B', 'C'].map(g => (
-                  <div key={g} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+                {['A', 'B'].map(g => (
+                  <div key={g} className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-md bg-accent/10 border border-accent/20 flex items-center justify-center">
-                        <span className="font-heading font-bold text-accent text-sm">{g}</span>
+                      <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                        <span className="font-heading font-bold text-emerald-400 text-sm">{g}</span>
                       </div>
-                      <span className="font-heading font-medium text-white text-sm">Group {g}</span>
+                      <div>
+                        <p className="font-heading font-medium text-white text-sm">Group {g}</p>
+                        <p className="text-zinc-600 text-[10px] uppercase font-body tracking-wider">Frontend/MERN</p>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="font-heading font-bold text-white text-lg">
-                        {stats?.students_per_group?.[g] ?? 0}
+                    <div className="flex items-center gap-4">
+                      <span className="font-heading font-bold text-white text-xl">
+                        {stats?.students_breakdown?.webdev?.[g] ?? 0}
                       </span>
                       <Link
-                        to={`/admin/students?group=${g}`}
-                        className="text-xs text-zinc-500 hover:text-accent transition-colors duration-200 font-body"
+                        to={`/admin/students?domain=webdev&group=${g}`}
+                        className="text-xs text-zinc-500 hover:text-emerald-400 transition-colors font-body"
                       >
-                        View →
+                        View
                       </Link>
                     </div>
                   </div>
@@ -77,41 +83,64 @@ export default function AdminDashboard() {
               </div>
             </section>
 
-            {/* Late submissions */}
+            {/* AI Track */}
             <section className="animate-fade-up delay-225">
-              <h2 className="font-heading font-semibold text-white text-base mb-4">
-                Late submissions
-                {stats?.late_submissions?.length > 0 && (
-                  <span className="ml-2 badge badge-late">{stats.late_submissions.length}</span>
-                )}
-              </h2>
-              {!stats?.late_submissions?.length ? (
-                <div className="card text-center py-10">
-                  <p className="text-zinc-600 font-body text-sm">No late submissions</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {stats.late_submissions.slice(0, 6).map((s, i) => (
-                    <div
-                      key={s.id}
-                      className="card flex items-center justify-between gap-4 animate-fade-up"
-                      style={{ animationDelay: `${i * 40}ms` }}
-                    >
-                      <div className="min-w-0">
-                        <p className="font-heading font-medium text-white text-sm truncate">
-                          {s.users?.full_name}
-                        </p>
-                        <p className="text-zinc-600 text-xs font-body truncate">
-                          {s.tasks?.title}
-                        </p>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-2 h-6 bg-purple-500 rounded-full" />
+                <h2 className="font-heading font-semibold text-white text-lg">Artificial Intelligence</h2>
+              </div>
+              <div className="card divide-y divide-border">
+                {['A', 'B', 'C'].map(g => (
+                  <div key={g} className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
+                        <span className="font-heading font-bold text-purple-400 text-sm">{g}</span>
                       </div>
-                      <span className="badge badge-late flex-shrink-0">Late</span>
+                      <div>
+                        <p className="font-heading font-medium text-white text-sm">Group {g}</p>
+                        <p className="text-zinc-600 text-[10px] uppercase font-body tracking-wider">ML/GenAI</p>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              )}
+                    <div className="flex items-center gap-4">
+                      <span className="font-heading font-bold text-white text-xl">
+                        {stats?.students_breakdown?.ai?.[g] ?? 0}
+                      </span>
+                      <Link
+                        to={`/admin/students?domain=ai&group=${g}`}
+                        className="text-xs text-zinc-500 hover:text-purple-400 transition-colors font-body"
+                      >
+                        View
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </section>
           </div>
+
+          {/* Late submissions footer */}
+          {stats?.late_submissions?.length > 0 && (
+            <section className="animate-fade-up delay-300">
+               <h2 className="font-heading font-semibold text-red-400 text-base mb-4 flex items-center gap-2">
+                 <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                 </span>
+                 Urgent Attention Required
+               </h2>
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                 {stats.late_submissions.map(s => (
+                   <div key={s.id} className="card bg-red-500/[0.02] border-red-500/10 flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-heading font-medium text-white text-xs truncate">{s.users?.full_name}</p>
+                        <p className="text-zinc-600 text-[10px] font-body truncate">{s.tasks?.title}</p>
+                      </div>
+                      <Link to={`/admin/submissions/${s.id}`} className="text-[10px] text-red-400 font-heading hover:underline">Review</Link>
+                   </div>
+                 ))}
+               </div>
+            </section>
+          )}
         </>
       )}
     </AppLayout>
@@ -120,8 +149,8 @@ export default function AdminDashboard() {
 
 function StatCard({ label, value, accent, danger }) {
   return (
-    <div className="card">
-      <p className="text-zinc-600 text-xs font-body uppercase tracking-wider mb-2">{label}</p>
+    <div className="card hover:border-zinc-700 transition-colors">
+      <p className="text-zinc-600 text-[10px] font-body uppercase tracking-wider mb-2">{label}</p>
       <p className={`font-heading font-bold text-3xl ${danger ? 'text-red-400' : accent ? 'text-accent' : 'text-white'}`}>
         {value}
       </p>

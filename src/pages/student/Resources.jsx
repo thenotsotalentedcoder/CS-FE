@@ -1,53 +1,39 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import AppLayout from '../../components/layout/AppLayout.jsx';
 import ResourceCard from '../../components/resources/ResourceCard.jsx';
-import api from '../../lib/api.js';
+import { 
+  fetchResources, 
+  toggleSaveResource, 
+  selectResources, 
+  selectResourcesLoading 
+} from '../../store/slices/resourcesSlice.js';
 
 const TABS = ['all', 'saved'];
 const TYPES = ['all', 'youtube', 'documentation', 'repository'];
 const CATEGORIES = ['all', 'web dev', 'essentials', 'ai', 'misc'];
 
 export default function StudentResources() {
+  const dispatch = useDispatch();
+  const resources = useSelector(selectResources);
+  const loading = useSelector(selectResourcesLoading);
+
   const [tab, setTab] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
-  const [resources, setResources] = useState([]);
-  const [saved, setSaved] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [resRes, savedRes] = await Promise.all([
-        api.get('/api/resources'),
-        api.get('/api/resources/saved'),
-      ]);
-      setResources(resRes.data);
-      setSaved(savedRes.data.map(r => r.id));
-    } catch {
-      // silent
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const load = useCallback(() => {
+    dispatch(fetchResources());
+  }, [dispatch]);
 
   useEffect(() => { load(); }, [load]);
 
-  async function handleSaveToggle(id, isSaved) {
-    if (isSaved) {
-      await api.delete(`/api/resources/${id}/save`);
-      setSaved(s => s.filter(x => x !== id));
-    } else {
-      await api.post(`/api/resources/${id}/save`);
-      setSaved(s => [...s, id]);
-    }
-    // Update is_saved flag on resource list
-    setResources(rs => rs.map(r => r.id === id ? { ...r, is_saved: !isSaved } : r));
-  }
+  const handleSaveToggle = (id) => {
+    dispatch(toggleSaveResource(id));
+  };
 
-  const displayList = tab === 'saved'
-    ? resources.filter(r => saved.includes(r.id))
-    : resources;
+  const savedResources = resources.filter(r => r.is_saved);
+  const displayList = tab === 'saved' ? savedResources : resources;
 
   const filtered = displayList
     .filter(r => typeFilter === 'all' || r.type === typeFilter)
@@ -70,7 +56,7 @@ export default function StudentResources() {
             className={`px-4 py-1.5 rounded text-sm font-heading font-medium transition-colors duration-200 cursor-pointer focus-ring capitalize
               ${tab === t ? 'bg-surface text-white border border-border' : 'text-zinc-500 hover:text-white'}`}
           >
-            {t === 'saved' ? `Saved${saved.length > 0 ? ` (${saved.length})` : ''}` : 'All'}
+            {t === 'saved' ? `Saved${savedResources.length > 0 ? ` (${savedResources.length})` : ''}` : 'All'}
           </button>
         ))}
       </div>
@@ -141,7 +127,7 @@ export default function StudentResources() {
           {filtered.map((r, i) => (
             <div key={r.id} className="animate-fade-up" style={{ animationDelay: `${i * 50}ms` }}>
               <ResourceCard
-                resource={{ ...r, is_saved: saved.includes(r.id) }}
+                resource={r}
                 variant="student"
                 onSaveToggle={handleSaveToggle}
               />

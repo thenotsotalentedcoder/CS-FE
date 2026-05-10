@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 const CATEGORIES = ['web dev', 'essentials', 'ai', 'misc'];
-const EMPTY = { title: '', type: 'youtube', url: '', target_group: 'none', is_public: false, category: 'misc', subtitle: '' };
+const EMPTY = { title: '', type: 'youtube', url: '', target_group: 'none', domain: 'all', is_public: false, category: 'misc', subtitle: '' };
 
 export default function ResourceForm({ initial, onSubmit, onCancel, loading }) {
   const [form, setForm] = useState(EMPTY);
@@ -79,20 +79,38 @@ export default function ResourceForm({ initial, onSubmit, onCancel, loading }) {
         </div>
       </div>
 
-      <div>
-        <label htmlFor="res-group" className="label">Target group</label>
-        <select
-          id="res-group"
-          value={form.target_group}
-          onChange={e => set('target_group', e.target.value)}
-          className="input cursor-pointer"
-        >
-          <option value="none">None (public only)</option>
-          <option value="all">All groups</option>
-          <option value="A">Group A</option>
-          <option value="B">Group B</option>
-          <option value="C">Group C</option>
-        </select>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="res-domain" className="label">Target track</label>
+          <select
+            id="res-domain"
+            value={form.domain}
+            onChange={e => set('domain', e.target.value)}
+            className="input cursor-pointer"
+          >
+            <option value="none">None (Public only)</option>
+            <option value="all">All Tracks</option>
+            <option value="webdev">Web Development</option>
+            <option value="ai">AI Track</option>
+          </select>
+        </div>
+
+        {form.domain !== 'none' && (
+          <div>
+            <label htmlFor="res-group" className="label">Target group</label>
+            <select
+              id="res-group"
+              value={form.target_group}
+              onChange={e => set('target_group', e.target.value)}
+              className="input cursor-pointer"
+            >
+              <option value="all">All groups</option>
+              <option value="A">Group A</option>
+              <option value="B">Group B</option>
+              {(form.domain === 'ai' || form.domain === 'all') && <option value="C">Group C</option>}
+            </select>
+          </div>
+        )}
       </div>
 
       <div>

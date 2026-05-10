@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { store } from './store/index.js';
 import { AuthProvider } from './hooks/useAuth.jsx';
 import { NotificationsProvider } from './hooks/useNotifications.jsx';
 import ProtectedRoute from './components/auth/ProtectedRoute.jsx';
@@ -31,40 +33,42 @@ import AdminAnnouncements from './pages/admin/Announcements.jsx';
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <NotificationsProvider>
-        <Routes>
-          {/* Public */}
-          <Route path="/" element={<Landing />} />
-          <Route path="/resources" element={<PublicResources />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
+    <Provider store={store}>
+      <BrowserRouter>
+        <AuthProvider>
+          <NotificationsProvider>
+          <Routes>
+            {/* Public */}
+            <Route path="/" element={<Landing />} />
+            <Route path="/resources" element={<PublicResources />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
-          {/* Student */}
-          <Route path="/dashboard" element={<ProtectedRoute><StudentDashboard /></ProtectedRoute>} />
-          <Route path="/my-resources" element={<ProtectedRoute><StudentResources /></ProtectedRoute>} />
-          <Route path="/my-tasks" element={<ProtectedRoute><StudentTasks /></ProtectedRoute>} />
-          <Route path="/my-tasks/:id" element={<ProtectedRoute><StudentTaskDetail /></ProtectedRoute>} />
-          <Route path="/announcements" element={<ProtectedRoute><StudentAnnouncements /></ProtectedRoute>} />
+            {/* Student */}
+            <Route path="/dashboard" element={<ProtectedRoute><StudentDashboard /></ProtectedRoute>} />
+            <Route path="/my-resources" element={<ProtectedRoute><StudentResources /></ProtectedRoute>} />
+            <Route path="/my-tasks" element={<ProtectedRoute><StudentTasks /></ProtectedRoute>} />
+            <Route path="/my-tasks/:id" element={<ProtectedRoute><StudentTaskDetail /></ProtectedRoute>} />
+            <Route path="/announcements" element={<ProtectedRoute><StudentAnnouncements /></ProtectedRoute>} />
 
-          {/* Admin */}
-          <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-          <Route path="/admin/students" element={<AdminRoute><AdminStudents /></AdminRoute>} />
-          <Route path="/admin/students/:id" element={<AdminRoute><AdminStudentProfile /></AdminRoute>} />
-          <Route path="/admin/allowlist" element={<AdminRoute><AdminAllowlist /></AdminRoute>} />
-          <Route path="/admin/resources" element={<AdminRoute><AdminResources /></AdminRoute>} />
-          <Route path="/admin/tasks" element={<AdminRoute><AdminTasks /></AdminRoute>} />
-          <Route path="/admin/tasks/:id" element={<AdminRoute><AdminTaskDetail /></AdminRoute>} />
-          <Route path="/admin/tasks/:taskId/submissions/:submissionId" element={<AdminRoute><AdminSubmissionReview /></AdminRoute>} />
-          <Route path="/admin/announcements" element={<AdminRoute><AdminAnnouncements /></AdminRoute>} />
+            {/* Admin */}
+            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+            <Route path="/admin/students" element={<AdminRoute><AdminStudents /></AdminRoute>} />
+            <Route path="/admin/students/:id" element={<AdminRoute><AdminStudentProfile /></AdminRoute>} />
+            <Route path="/admin/allowlist" element={<AdminRoute><AdminAllowlist /></AdminRoute>} />
+            <Route path="/admin/resources" element={<AdminRoute><AdminResources /></AdminRoute>} />
+            <Route path="/admin/tasks" element={<AdminRoute><AdminTasks /></AdminRoute>} />
+            <Route path="/admin/tasks/:id" element={<AdminRoute><AdminTaskDetail /></AdminRoute>} />
+            <Route path="/admin/tasks/:taskId/submissions/:submissionId" element={<AdminRoute><AdminSubmissionReview /></AdminRoute>} />
+            <Route path="/admin/announcements" element={<AdminRoute><AdminAnnouncements /></AdminRoute>} />
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-        </NotificationsProvider>
-      </AuthProvider>
-    </BrowserRouter>
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+          </NotificationsProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </Provider>
   );
 }

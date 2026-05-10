@@ -1,5 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useDispatch, useSelector } from 'react-redux';
+import { 
+  fetchChatHistory, 
+  sendMessage, 
+  clearChat, 
+  addLocalMessage,
+  selectChatMessages, 
+  selectChatLoading, 
+  selectChatSending 
+} from '../../store/slices/chatSlice.js';
 import api from '../../lib/api.js';
 
 function TypingIndicator() {
@@ -135,9 +145,11 @@ function MessageBubble({ msg }) {
 }
 
 export default function KernelPanel({ open, onClose }) {
-  const [messages, setMessages] = useState([]);
+  const dispatch = useDispatch();
+  const messages = useSelector(selectChatMessages);
+  const loadingHistory = useSelector(selectChatLoading);
+  const sendingMessage = useSelector(selectChatSending);
   const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
@@ -145,19 +157,30 @@ export default function KernelPanel({ open, onClose }) {
   // Load history on first open
   useEffect(() => {
     if (open && !historyLoaded) {
-      api.get('/api/chat/history')
-        .then(r => {
-          setMessages(r.data);
-          setHistoryLoaded(true);
-        })
-        .catch(() => setHistoryLoaded(true));
+      dispatch(fetchChatHistory())
+        .finally(() => setHistoryLoaded(true));
     }
-  }, [open, historyLoaded]);
+  }, [open, historyLoaded, dispatch]);
 
-  // Scroll to bottom on new messages
+  // Scroll management
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, loading]);
+    if (messages.length === 0) return;
+
+    const lastMessage = messages[messages.length - 1];
+    const isInitialLoad = historyLoaded && messages.length > 0 && !sendingMessage;
+
+    // Use instant scroll for initial history load, smooth for new messages
+    const behavior = isInitialLoad ? 'auto' : 'smooth';
+
+    if (lastMessage.role === 'assistant' && !isInitialLoad) {
+      // For new assistant messages, scroll to the top of the bubble 
+      // so the user can start reading from the beginning
+      const lastBubble = bottomRef.current?.previousSibling;
+      lastBubble?.scrollIntoView({ behavior, block: 'start' });
+    } else {
+      bottomRef.current?.scrollIntoView({ behavior });
+    }
+  }, [messages, sendingMessage, historyLoaded]);
 
   // Focus input when opened
   useEffect(() => {
@@ -167,31 +190,19 @@ export default function KernelPanel({ open, onClose }) {
   async function handleSend(e) {
     e.preventDefault();
     const text = input.trim();
-    if (!text || loading) return;
+    if (!text || sendingMessage) return;
 
-    const userMsg = { id: Date.now(), role: 'user', content: text };
-    setMessages(prev => [...prev, userMsg]);
+    dispatch(addLocalMessage(text));
     setInput('');
-    setLoading(true);
-
-    try {
-      const { data } = await api.post('/api/chat', { message: text });
-      setMessages(prev => [...prev, { id: Date.now() + 1, role: 'assistant', content: data.reply }]);
-    } catch {
-      setMessages(prev => [...prev, {
-        id: Date.now() + 1,
-        role: 'assistant',
-        content: 'Something went wrong. Please try again.',
-      }]);
-    } finally {
-      setLoading(false);
+    
+    dispatch(sendMessage(text)).then(() => {
       setTimeout(() => inputRef.current?.focus(), 50);
-    }
+    });
   }
 
   async function handleClear() {
     await api.delete('/api/chat/history');
-    setMessages([]);
+    dispatch(clearChat());
   }
 
   return (
@@ -266,7 +277,7 @@ export default function KernelPanel({ open, onClose }) {
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto px-3 py-4 space-y-3 scrollbar-none">
-              {messages.length === 0 && !loading && (
+              {messages.length === 0 && !sendingMessage && !loadingHistory && (
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -290,7 +301,7 @@ export default function KernelPanel({ open, onClose }) {
                 <MessageBubble key={msg.id} msg={msg} />
               ))}
 
-              {loading && (
+              {sendingMessage && (
                 <div className="flex justify-start">
                   <div
                     className="bg-white/5 border border-white/10 rounded-2xl rounded-bl-sm backdrop-blur-sm ml-8"
@@ -315,12 +326,12 @@ export default function KernelPanel({ open, onClose }) {
                 onChange={e => setInput(e.target.value)}
                 placeholder="Ask Kernel anything..."
                 className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3.5 py-2 text-sm text-white placeholder-zinc-600 font-body outline-none focus:border-accent/40 transition-colors duration-200"
-                disabled={loading}
+                disabled={sendingMessage}
                 autoComplete="off"
               />
               <button
                 type="submit"
-                disabled={loading || !input.trim()}
+                disabled={sendingMessage || !input.trim()}
                 className="w-8 h-8 rounded-xl bg-accent flex items-center justify-center shrink-0 disabled:opacity-30 transition-opacity duration-200 cursor-pointer"
                 style={{ boxShadow: input.trim() ? '0 0 12px rgba(34,197,94,0.4)' : 'none' }}
               >

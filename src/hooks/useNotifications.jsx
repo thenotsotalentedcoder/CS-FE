@@ -1,44 +1,42 @@
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import api from '../lib/api.js';
+import { createContext, useContext, useEffect, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useAuth } from './useAuth.jsx';
+import { 
+  fetchNotifications, 
+  markNotificationRead, 
+  markAllNotificationsRead,
+  selectNotifications,
+  selectUnreadCount,
+  selectNotificationsLoading,
+  clearNotifications
+} from '../store/slices/notificationsSlice.js';
 
 const NotificationsContext = createContext(null);
 
 export function NotificationsProvider({ children }) {
+  const dispatch = useDispatch();
   const { session } = useAuth();
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const notifications = useSelector(selectNotifications);
+  const unreadCount = useSelector(selectUnreadCount);
+  const loading = useSelector(selectNotificationsLoading);
 
-  const unreadCount = notifications.filter((n) => !n.is_read).length;
-
-  const refresh = useCallback(async () => {
-    if (!session) return;
-    setLoading(true);
-    try {
-      const { data } = await api.get('/api/notifications');
-      setNotifications(data);
-    } catch {
-      // silent
-    } finally {
-      setLoading(false);
+  const refresh = useCallback(() => {
+    if (session) {
+      dispatch(fetchNotifications());
     }
-  }, [session]);
+  }, [session, dispatch]);
 
   useEffect(() => {
     if (session) refresh();
-    else setNotifications([]);
-  }, [session, refresh]);
+    else dispatch(clearNotifications());
+  }, [session, refresh, dispatch]);
 
   async function markRead(id) {
-    await api.patch(`/api/notifications/${id}/read`);
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
-    );
+    dispatch(markNotificationRead(id));
   }
 
   async function markAllRead() {
-    await api.patch('/api/notifications/read-all');
-    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    dispatch(markAllNotificationsRead());
   }
 
   return (

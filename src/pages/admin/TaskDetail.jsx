@@ -2,17 +2,30 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import AppLayout from '../../components/layout/AppLayout.jsx';
 import api from '../../lib/api.js';
+import TaskDiscussion from '../../components/tasks/TaskDiscussion.jsx';
 
 export default function AdminTaskDetail() {
   const { id } = useParams();
   const [task, setTask] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [unreadCounts, setUnreadCounts] = useState({});
 
   useEffect(() => {
     api.get(`/api/tasks/${id}`)
       .then(r => setTask(r.data))
       .catch(() => {})
       .finally(() => setLoading(false));
+
+    const fetchUnread = () => {
+      api.get(`/api/tasks/${id}/unread-counts`)
+        .then(r => setUnreadCounts(r.data))
+        .catch(() => {});
+    };
+
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 10000);
+    return () => clearInterval(interval);
   }, [id]);
 
   if (loading) return (
@@ -100,6 +113,7 @@ export default function AdminTaskDetail() {
                   <th className="text-left px-4 py-3 text-xs font-heading font-medium text-zinc-500 uppercase tracking-wider">Student</th>
                   <th className="text-left px-4 py-3 text-xs font-heading font-medium text-zinc-500 uppercase tracking-wider">Status</th>
                   <th className="text-left px-4 py-3 text-xs font-heading font-medium text-zinc-500 uppercase tracking-wider hidden sm:table-cell">Submitted</th>
+                  <th className="text-left px-4 py-3 text-xs font-heading font-medium text-zinc-500 uppercase tracking-wider">Chat</th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
@@ -124,6 +138,25 @@ export default function AdminTaskDetail() {
                           : '—'}
                       </p>
                     </td>
+                    <td className="px-4 py-3">
+                      <button 
+                        onClick={() => {
+                          setSelectedStudent({ id: a.id, name: a.full_name });
+                          setUnreadCounts(prev => ({ ...prev, [a.id]: 0 }));
+                        }}
+                        className="p-2 rounded-lg bg-surface-2 border border-white/5 hover:border-accent/30 transition-all group relative"
+                        title="Open Discussion"
+                      >
+                        <svg className="w-4 h-4 text-zinc-400 group-hover:text-accent transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                        {unreadCounts[a.id] > 0 && (
+                          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-accent text-black text-[9px] font-heading font-black flex items-center justify-center rounded-full animate-pulse ring-2 ring-black">
+                            {unreadCounts[a.id]}
+                          </span>
+                        )}
+                      </button>
+                    </td>
                     <td className="px-4 py-3 text-right">
                       {a.submission ? (
                         <Link
@@ -143,6 +176,23 @@ export default function AdminTaskDetail() {
           </div>
         )}
       </section>
+
+      {/* Discussion Sidebar */}
+      {selectedStudent && (
+        <>
+          <div 
+            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm animate-fade-in lg:hidden"
+            onClick={() => setSelectedStudent(null)}
+          />
+          <div className="fixed top-0 right-0 bottom-0 z-50 w-full max-w-sm p-4 animate-slide-in-right">
+             <TaskDiscussion 
+               taskId={id} 
+               studentId={selectedStudent.id}
+               onClose={() => setSelectedStudent(null)} 
+             />
+          </div>
+        </>
+      )}
     </AppLayout>
   );
 }

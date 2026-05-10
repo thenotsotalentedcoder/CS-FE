@@ -12,6 +12,7 @@ export default function AdminResources() {
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
   const [typeFilter, setTypeFilter] = useState('all');
+  const [domainFilter, setDomainFilter] = useState('all');
   const [groupFilter, setGroupFilter] = useState('all');
 
   const load = useCallback(async () => {
@@ -59,6 +60,7 @@ export default function AdminResources() {
 
   const filtered = resources
     .filter(r => typeFilter === 'all' || r.type === typeFilter)
+    .filter(r => domainFilter === 'all' || r.domain === domainFilter)
     .filter(r => groupFilter === 'all' || r.target_group === groupFilter);
 
   return (
@@ -86,6 +88,16 @@ export default function AdminResources() {
           ]}
           value={typeFilter}
           onChange={setTypeFilter}
+        />
+        <FilterGroup
+          label="Track"
+          options={[
+            { value: 'all', label: 'All tracks' },
+            { value: 'webdev', label: 'Web Dev' },
+            { value: 'ai', label: 'AI' },
+          ]}
+          value={domainFilter}
+          onChange={setDomainFilter}
         />
         <FilterGroup
           label="Group"

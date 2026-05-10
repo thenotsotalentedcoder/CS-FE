@@ -80,9 +80,6 @@ export default function AdminStudentProfile() {
                   ? <span className="badge badge-reviewed">Group {student.group}</span>
                   : <span className="badge badge-pending">No group</span>
               }
-              {student.skill_level && (
-                <span className="badge badge-not-submitted capitalize">{student.skill_level}</span>
-              )}
               <span className="text-zinc-600 text-xs font-body">
                 Joined {new Date(student.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
               </span>

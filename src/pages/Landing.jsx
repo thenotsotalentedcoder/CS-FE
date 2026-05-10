@@ -57,7 +57,7 @@ export default function Landing() {
         className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/5"
       >
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-          <span className="font-heading font-bold text-base tracking-tight">
+          <span className="font-heading font-bold text-base tracking-tight text-white">
             Cold<span className="text-accent">Start</span>
           </span>
           <div className="flex items-center gap-2">
@@ -121,9 +121,9 @@ export default function Landing() {
             variants={fadeUp}
           >
             <p className="text-zinc-400 font-body text-base leading-relaxed max-w-sm">
-              A private platform built for this web dev community.
+              A private platform built for Web Dev and AI communities.
               Tasks, deadlines, resources, and feedback — all in one place,
-              structured around your skill level.
+              structured across specialized technical tracks.
             </p>
             <div className="flex items-center gap-3 shrink-0">
               <Link to="/signup" className="btn-primary text-sm px-6 py-2.5">
@@ -201,7 +201,7 @@ export default function Landing() {
 
       <div className="border-t border-white/5" />
 
-      {/* Groups */}
+      {/* Universes */}
       <section className="py-28 px-6">
         <div className="max-w-7xl mx-auto">
           <motion.div
@@ -210,48 +210,60 @@ export default function Landing() {
             viewport={{ once: true, margin: '-80px' }}
             variants={fadeUp}
             custom={0}
+            className="mb-16"
           >
             <p className="font-body text-xs tracking-[0.2em] uppercase text-zinc-600 mb-4">
-              Skill groups
+              Curriculum Tracks
             </p>
             <h2
-              className="font-heading font-bold text-white leading-tight mb-16"
+              className="font-heading font-bold text-white leading-tight"
               style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)' }}
             >
-              Three paths,<br />
-              one platform.
+              Two Domains.<br />
+              Five Specialized Paths.
             </h2>
           </motion.div>
 
-          <motion.div
-            className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-white/5 border border-white/5 rounded-lg overflow-hidden"
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: '-60px' }}
-            variants={staggerContainer}
-          >
-            {GROUPS.map((g) => (
-              <motion.div
-                key={g.label}
-                className="bg-black p-8 group hover:bg-zinc-950 transition-colors duration-300 cursor-default"
-                variants={staggerItem}
-              >
-                <div className="flex items-center justify-between mb-8">
-                  <motion.span
-                    className="font-heading font-black text-accent"
-                    style={{ fontSize: 'clamp(2.5rem, 6vw, 4rem)', lineHeight: 1 }}
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                  >
-                    {g.label}
-                  </motion.span>
-                  <span className="text-zinc-700 text-xs font-body">{g.track}</span>
+          <div className="space-y-24">
+            {TRACKS.map((track, trackIdx) => (
+              <div key={track.name} className="animate-fade-up" style={{ animationDelay: `${trackIdx * 100}ms` }}>
+                <div className="flex items-center gap-3 mb-10">
+                  <div className={`w-1.5 h-6 ${track.color} rounded-full shadow-lg shadow-${track.color.split('-')[1]}-500/20`} />
+                  <h3 className="font-heading font-bold text-2xl text-white tracking-tight">{track.name}</h3>
                 </div>
-                <h3 className="font-heading font-bold text-white text-lg mb-3">{g.title}</h3>
-                <p className="text-zinc-500 font-body text-sm leading-relaxed">{g.desc}</p>
-              </motion.div>
+                
+                <motion.div
+                  className={`grid grid-cols-1 ${track.groups.length === 2 ? 'sm:grid-cols-2 max-w-4xl' : 'sm:grid-cols-3'} gap-px bg-white/5 border border-white/5 rounded-lg overflow-hidden`}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true, margin: '-60px' }}
+                  variants={staggerContainer}
+                >
+                  {track.groups.map((g) => (
+                    <motion.div
+                      key={g.label}
+                      className="bg-black p-8 group hover:bg-zinc-950 transition-colors duration-300 cursor-default"
+                      variants={staggerItem}
+                    >
+                      <div className="flex items-center justify-between mb-8">
+                        <motion.span
+                          className="font-heading font-black text-accent"
+                          style={{ fontSize: 'clamp(2.5rem, 6vw, 4rem)', lineHeight: 1 }}
+                          whileHover={{ scale: 1.05 }}
+                          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                        >
+                          {g.label}
+                        </motion.span>
+                        <span className="text-zinc-700 text-[10px] font-heading uppercase tracking-widest">{g.subtitle}</span>
+                      </div>
+                      <h3 className="font-heading font-bold text-white text-lg mb-3">{g.title}</h3>
+                      <p className="text-zinc-500 font-body text-sm leading-relaxed">{g.desc}</p>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -281,7 +293,7 @@ export default function Landing() {
                 <span className="text-accent">Kernel.</span>
               </h2>
               <p className="text-zinc-400 font-body text-sm leading-relaxed max-w-sm">
-                Ask it anything. It already knows your tasks, deadlines, and where you're at.
+                Ask it anything. It already knows your track, your domain, and your current milestones.
               </p>
             </motion.div>
 
@@ -317,7 +329,7 @@ export default function Landing() {
                     <div>
                       <p className="text-white text-sm font-heading font-semibold leading-none">Kernel</p>
                       <p className="text-accent text-xs font-body mt-0.5 leading-none" style={{ textShadow: '0 0 8px rgba(34,197,94,0.5)' }}>
-                        AI Assistant
+                        Track-Aware Mentor
                       </p>
                     </div>
                   </div>
@@ -421,7 +433,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="border-t border-white/5 px-6 py-8">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <span className="font-heading font-bold text-sm">
+          <span className="font-heading font-bold text-sm text-white">
             Cold<span className="text-accent">Start</span>
           </span>
           <span className="text-zinc-700 text-xs font-body">Beta</span>
@@ -506,48 +518,84 @@ function ResourcesPreview() {
 }
 
 const KERNEL_DEMO = [
-  { role: 'user', content: 'My Figma task is due tomorrow. Where do I start?' },
-  { role: 'assistant', content: "Start with a UI kit from Figma Community — search \"food app free\". Use existing components for buttons and cards so you're not building from scratch. Focus on 3 screens max: home, item detail, and cart." },
-  { role: 'user', content: 'Any good resources on Figma?' },
-  { role: 'assistant', content: 'There\'s a Figma Basics video in your resources tab. That\'s your fastest path in.' },
+  { 
+    role: 'user', 
+    content: "I'm stuck on the 'FastAPI Integration' task. My middleware is throwing a 403 on the AI endpoint." 
+  },
+  { 
+    role: 'assistant', 
+    content: "Since you're in AI Group C, you're likely hitting CORS restrictions. Check your `allow_origins` list. It should include your frontend dev port. I've linked the 'Production API' resource in your sidebar for the exact security patterns we use here." 
+  },
+  { 
+    role: 'user', 
+    content: "That worked! What's my next milestone?" 
+  },
+  { 
+    role: 'assistant', 
+    content: "Great! Your current milestone is 'Prompt Chaining with LangChain'. Once you submit this review, you'll unlock the Autonomous Agents module. Ready to dive in?" 
+  },
 ];
 
 const STEPS = [
   {
+    title: 'Choose your universe',
+    body: 'Whether it’s Web Development or Artificial Intelligence, you’re assigned a track tailored to your current trajectory.',
+  },
+  {
     title: 'Admin assigns you tasks',
-    body: 'Tasks come with deadlines and optional reference material. You know exactly what to build and when.',
+    body: 'Specific milestones with deadlines. From HTML foundations to LLM deployments, you know exactly what to build.',
   },
   {
-    title: 'You submit your Github repo',
-    body: 'When done, push changes in your repo and repo link. Submit it through the platform to notify admin it’s ready for review.',
+    title: 'You submit your work',
+    body: 'Push to GitHub and submit your link. Your domain instructor reviews your code and provides precision feedback.',
   },
   {
-    title: 'Feedback comes back to you',
-    body: 'Admin reviews your work and leaves feedback directly on the platform. No DMs, no delays.',
-  },
-  {
-    title: 'Resources are curated for you',
-    body: 'YouTube links, docs, repos — organized by your group and skill level. Save the ones you need.',
+    title: 'Kernel guides your path',
+    body: 'An AI mentor that knows your track. Ask it about your tasks, resource recommendations, or debugging help.',
   },
 ];
 
-const GROUPS = [
+const TRACKS = [
   {
-    label: 'A',
-    title: 'Beginners',
-    track: 'HTML track',
-    desc: 'No prior experience. You start from zero — HTML structure, CSS styling, the fundamentals.',
+    name: 'Web Development',
+    color: 'bg-emerald-500',
+    groups: [
+      {
+        label: 'A',
+        title: 'Foundations',
+        subtitle: 'HTML, CSS & JS',
+        desc: 'Mastering the structure, style, and interactivity of the web. Building responsive layouts and core DOM logic.',
+      },
+      {
+        label: 'B',
+        title: 'Fullstack',
+        subtitle: 'MERN Stack',
+        desc: 'Building production-ready, scalable applications with MongoDB, Express, React, and Node.js.',
+      },
+    ]
   },
   {
-    label: 'B',
-    title: 'Intermediate',
-    track: 'JS track',
-    desc: 'HTML and CSS are solid. Now you learn JavaScript — DOM, events, logic, interactivity.',
-  },
-  {
-    label: 'C',
-    title: 'Advanced',
-    track: 'MERN track',
-    desc: 'Full JavaScript fluency. You build complete full-stack apps using MongoDB, Express, React, Node.',
-  },
+    name: 'Artificial Intelligence',
+    color: 'bg-purple-500',
+    groups: [
+      {
+        label: 'A',
+        title: 'Fundamentals',
+        subtitle: 'Python Essentials',
+        desc: 'Mastering Python programming, core data structures, OOP, and the algorithms required for intelligence.',
+      },
+      {
+        label: 'B',
+        title: 'Machine Learning',
+        subtitle: 'ML Track',
+        desc: 'Implementing classical ML algorithms, regression, classification, and data processing with Scikit-learn.',
+      },
+      {
+        label: 'C',
+        title: 'Generative AI',
+        subtitle: 'LLMs & APIs',
+        desc: 'Leveraging state-of-the-art LLMs, Prompt Engineering, FastAPI, and building autonomous agents.',
+      },
+    ]
+  }
 ];

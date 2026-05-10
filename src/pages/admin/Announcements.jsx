@@ -3,7 +3,7 @@ import AppLayout from '../../components/layout/AppLayout.jsx';
 import Modal from '../../components/ui/Modal.jsx';
 import api from '../../lib/api.js';
 
-const EMPTY = { title: '', body: '', target_group: 'all' };
+const EMPTY = { title: '', body: '', target_group: 'all', target_domain: 'all' };
 
 const GROUP_STYLE = {
   all: {
@@ -51,7 +51,7 @@ export default function AdminAnnouncements() {
   useEffect(() => { load(); }, [load]);
 
   function openCreate() { setEditing(null); setForm(EMPTY); setModalOpen(true); }
-  function openEdit(a) { setEditing(a); setForm({ title: a.title, body: a.body, target_group: a.target_group }); setModalOpen(true); }
+  function openEdit(a) { setEditing(a); setForm({ title: a.title, body: a.body, target_group: a.target_group, target_domain: a.target_domain || 'all' }); setModalOpen(true); }
   function closeModal() { setModalOpen(false); setEditing(null); }
   function setField(k, v) { setForm(f => ({ ...f, [k]: v })); }
 
@@ -123,6 +123,7 @@ export default function AdminAnnouncements() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <h3 className="font-heading font-semibold text-white text-sm">{a.title}</h3>
+                    <TrackBadge domain={a.target_domain} />
                     <GroupBadge group={a.target_group} gs={gs} />
                   </div>
                   <p className="text-zinc-500 font-body text-sm leading-relaxed mb-2 line-clamp-3">{a.body}</p>
@@ -185,19 +186,34 @@ export default function AdminAnnouncements() {
             />
           </div>
 
-          <div>
-            <label htmlFor="ann-group" className="label">Target</label>
-            <select
-              id="ann-group"
-              value={form.target_group}
-              onChange={e => setField('target_group', e.target.value)}
-              className="input cursor-pointer"
-            >
-              <option value="all">All students</option>
-              <option value="A">Group A only</option>
-              <option value="B">Group B only</option>
-              <option value="C">Group C only</option>
-            </select>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="ann-domain" className="label">Target Track</label>
+              <select
+                id="ann-domain"
+                value={form.target_domain}
+                onChange={e => setField('target_domain', e.target.value)}
+                className="input cursor-pointer"
+              >
+                <option value="all">All Tracks</option>
+                <option value="webdev">Web Development</option>
+                <option value="ai">AI Track</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="ann-group" className="label">Target Group</label>
+              <select
+                id="ann-group"
+                value={form.target_group}
+                onChange={e => setField('target_group', e.target.value)}
+                className="input cursor-pointer"
+              >
+                <option value="all">All groups</option>
+                <option value="A">Group A only</option>
+                <option value="B">Group B only</option>
+                {(form.target_domain === 'ai' || form.target_domain === 'all') && <option value="C">Group C only</option>}
+              </select>
+            </div>
           </div>
 
           <div className="flex gap-3 pt-1">
@@ -209,6 +225,15 @@ export default function AdminAnnouncements() {
         </form>
       </Modal>
     </AppLayout>
+  );
+}
+function TrackBadge({ domain }) {
+  if (!domain || domain === 'all') return null;
+  const isAI = domain === 'ai';
+  return (
+    <span className={`badge border text-[10px] ${isAI ? 'text-purple-400 bg-purple-500/10 border-purple-500/20' : 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'}`}>
+      {isAI ? 'AI Track' : 'Web Dev'}
+    </span>
   );
 }
 

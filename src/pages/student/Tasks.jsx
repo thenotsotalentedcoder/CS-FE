@@ -1,21 +1,20 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import AppLayout from '../../components/layout/AppLayout.jsx';
-import api from '../../lib/api.js';
+import { fetchMyTasks, selectTasks, selectTasksLoading } from '../../store/slices/tasksSlice.js';
 
 const STATUS_FILTERS = ['all', 'pending', 'submitted', 'reviewed'];
 
 export default function StudentTasks() {
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  const tasks = useSelector(selectTasks);
+  const loading = useSelector(selectTasksLoading);
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
-    api.get('/api/tasks/my')
-      .then(r => setTasks(r.data))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+    dispatch(fetchMyTasks());
+  }, [dispatch]);
 
   const filtered = tasks.filter(t => {
     if (filter === 'all') return true;
@@ -103,15 +102,26 @@ function TaskCard({ task, index }) {
         </div>
         <p className="text-zinc-500 font-body text-sm line-clamp-2 mb-3">{task.description}</p>
         <div className="flex items-center gap-4">
-          <p className={`text-xs font-body ${overdue && !status ? 'text-red-400' : 'text-zinc-600'}`}>
-            Due {new Date(task.deadline).toLocaleDateString('en-US', {
-              month: 'short', day: 'numeric', year: 'numeric',
-              hour: '2-digit', minute: '2-digit',
-            })}
-          </p>
-          {task.reference_image_url && (
-            <span className="text-zinc-700 text-xs font-body">· Has reference image</span>
-          )}
+          <div className="flex items-center gap-2">
+            <p className={`text-[10px] font-body ${overdue && !status ? 'text-red-400' : 'text-zinc-600'}`}>
+              Due {new Date(task.deadline).toLocaleDateString('en-US', {
+                month: 'short', day: 'numeric', year: 'numeric',
+                hour: '2-digit', minute: '2-digit',
+              })}
+            </p>
+            {task.created_by_name && (
+              <>
+                <span className="w-1 h-1 rounded-full bg-zinc-800" />
+                <p className="text-[10px] text-zinc-600 font-body">Mentor: {task.created_by_name}</p>
+              </>
+            )}
+            {task.reference_image_url && (
+              <>
+                <span className="w-1 h-1 rounded-full bg-zinc-800" />
+                <span className="text-zinc-700 text-[10px] font-body">Has reference image</span>
+              </>
+            )}
+          </div>
         </div>
       </div>
 

@@ -2,21 +2,20 @@ import { useState, useEffect, useCallback } from 'react';
 import api from '../../lib/api.js';
 
 const GROUPS = ['A', 'B', 'C'];
-const SKILL_LEVELS = ['beginner', 'basic', 'intermediate'];
 
 export default function StudentPicker({ selected, onChange }) {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [domainFilter, setDomainFilter] = useState('all');
   const [groupFilter, setGroupFilter] = useState('all');
-  const [skillFilter, setSkillFilter] = useState('all');
   const [search, setSearch] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
+      if (domainFilter !== 'all') params.set('domain', domainFilter);
       if (groupFilter !== 'all') params.set('group', groupFilter);
-      if (skillFilter !== 'all') params.set('skill_level', skillFilter);
       const { data } = await api.get(`/api/tasks/assignable-students?${params}`);
       setStudents(data);
     } catch {
@@ -24,7 +23,7 @@ export default function StudentPicker({ selected, onChange }) {
     } finally {
       setLoading(false);
     }
-  }, [groupFilter, skillFilter]);
+  }, [domainFilter, groupFilter]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -57,7 +56,37 @@ export default function StudentPicker({ selected, onChange }) {
   return (
     <div className="space-y-3">
       {/* Filters row */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-x-4 gap-y-2">
+        {/* Domain filter */}
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setDomainFilter('all')}
+            className={`px-2.5 py-1 rounded text-xs font-heading font-medium transition-colors duration-200 cursor-pointer
+              ${domainFilter === 'all' ? 'bg-accent/10 text-accent border border-accent/20' : 'text-zinc-500 border border-border hover:text-white'}`}
+          >
+            All Tracks
+          </button>
+          <button
+            type="button"
+            onClick={() => setDomainFilter('webdev')}
+            className={`px-2.5 py-1 rounded text-xs font-heading font-medium transition-colors duration-200 cursor-pointer
+              ${domainFilter === 'webdev' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'text-zinc-500 border border-border hover:text-white'}`}
+          >
+            Web Dev
+          </button>
+          <button
+            type="button"
+            onClick={() => setDomainFilter('ai')}
+            className={`px-2.5 py-1 rounded text-xs font-heading font-medium transition-colors duration-200 cursor-pointer
+              ${domainFilter === 'ai' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'text-zinc-500 border border-border hover:text-white'}`}
+          >
+            AI Track
+          </button>
+        </div>
+
+        <div className="w-px h-4 bg-border self-center hidden sm:block" />
+
         {/* Group filter */}
         <div className="flex items-center gap-1">
           <button
@@ -81,28 +110,6 @@ export default function StudentPicker({ selected, onChange }) {
           ))}
         </div>
 
-        {/* Skill filter */}
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => setSkillFilter('all')}
-            className={`px-2.5 py-1 rounded text-xs font-heading font-medium transition-colors duration-200 cursor-pointer
-              ${skillFilter === 'all' ? 'bg-accent/10 text-accent border border-accent/20' : 'text-zinc-500 border border-border hover:text-white'}`}
-          >
-            All levels
-          </button>
-          {SKILL_LEVELS.map(sl => (
-            <button
-              key={sl}
-              type="button"
-              onClick={() => setSkillFilter(sl)}
-              className={`px-2.5 py-1 rounded text-xs font-heading font-medium transition-colors duration-200 cursor-pointer capitalize
-                ${skillFilter === sl ? 'bg-accent/10 text-accent border border-accent/20' : 'text-zinc-500 border border-border hover:text-white'}`}
-            >
-              {sl}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* Search */}
@@ -175,9 +182,6 @@ export default function StudentPicker({ selected, onChange }) {
 
                     <div className="flex items-center gap-1.5 flex-shrink-0">
                       <span className="badge badge-not-submitted text-[10px]">Grp {s.group}</span>
-                      {s.skill_level && (
-                        <span className="badge badge-not-submitted text-[10px] capitalize">{s.skill_level}</span>
-                      )}
                     </div>
                   </button>
                 </li>

@@ -1,16 +1,53 @@
 import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../../hooks/useNotifications.jsx';
+import { useAuth } from '../../hooks/useAuth.jsx';
 
 const TYPE_LABELS = {
   task_assigned: 'Task',
   resource_posted: 'Resource',
   announcement: 'Announcement',
   feedback_posted: 'Feedback',
+  chat_message: 'Message',
 };
 
 export default function NotificationPanel({ open, onClose }) {
   const { notifications, unreadCount, loading, markRead, markAllRead } = useNotifications();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const panelRef = useRef(null);
+
+  const handleNotificationClick = (n) => {
+    if (!n.is_read) markRead(n.id);
+    onClose();
+
+    if (!n.reference_id) return;
+
+    switch (n.type) {
+      case 'chat_message':
+      case 'task_assigned':
+        const path = user?.role === 'admin' 
+          ? `/admin/tasks/${n.reference_id}` 
+          : `/my-tasks/${n.reference_id}`;
+        navigate(path);
+        break;
+      case 'resource_posted':
+        navigate(user?.role === 'admin' ? '/admin/resources' : '/my-resources');
+        break;
+      case 'announcement':
+        navigate(user?.role === 'admin' ? '/admin/announcements' : '/announcements');
+        break;
+      case 'feedback_posted':
+        navigate(`/my-tasks/${n.reference_id}`);
+        break;
+      default:
+        if (n.reference_type === 'task') {
+          const p = user?.role === 'admin' ? `/admin/tasks/${n.reference_id}` : `/my-tasks/${n.reference_id}`;
+          navigate(p);
+        }
+        break;
+    }
+  };
 
   // Close on Escape
   useEffect(() => {
@@ -91,7 +128,7 @@ export default function NotificationPanel({ open, onClose }) {
                   style={{ animationDelay: `${i * 40}ms` }}
                 >
                   <button
-                    onClick={() => !n.is_read && markRead(n.id)}
+                    onClick={() => handleNotificationClick(n)}
                     className={`w-full text-left px-5 py-4 transition-colors duration-200 cursor-pointer
                       ${n.is_read ? 'hover:bg-surface-2' : 'bg-accent/5 hover:bg-accent/10'}`}
                   >

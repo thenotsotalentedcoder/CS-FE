@@ -1,39 +1,41 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { supabase } from '../lib/supabaseClient.js';
-import api from '../lib/api.js';
+import { 
+  setSession, 
+  fetchUserRow, 
+  selectAuth, 
+  selectIsAdmin, 
+  selectIsStudent, 
+  selectHasGroup,
+  clearAuth
+} from '../store/slices/authSlice.js';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(undefined); // undefined = loading
-  const [user, setUser] = useState(null);             // DB user row (role, group, etc.)
+  const dispatch = useDispatch();
+  const { session, user, loading } = useSelector(selectAuth);
+  const isAdmin = useSelector(selectIsAdmin);
+  const isStudent = useSelector(selectIsStudent);
+  const hasGroup = useSelector(selectHasGroup);
 
   useEffect(() => {
     // Initial session load
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session) fetchUserRow(session.user.id);
-      else setSession(null);
+      dispatch(setSession(session));
+      if (session) dispatch(fetchUserRow());
     });
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (session) fetchUserRow(session.user.id);
-      else setUser(null);
+      dispatch(setSession(session));
+      if (session) dispatch(fetchUserRow());
+      else dispatch(clearAuth());
     });
 
     return () => subscription.unsubscribe();
-  }, []);
-
-  async function fetchUserRow() {
-    try {
-      const { data } = await api.get('/api/auth/me');
-      setUser(data);
-    } catch {
-      setUser(null);
-    }
-  }
+  }, [dispatch]);
 
   async function signIn(email, password) {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -42,14 +44,8 @@ export function AuthProvider({ children }) {
 
   async function signOut() {
     await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
+    dispatch(clearAuth());
   }
-
-  const loading = session === undefined;
-  const isAdmin = user?.role === 'admin';
-  const isStudent = user?.role === 'student';
-  const hasGroup = !!user?.group;
 
   return (
     <AuthContext.Provider value={{ session, user, loading, isAdmin, isStudent, hasGroup, signIn, signOut }}>

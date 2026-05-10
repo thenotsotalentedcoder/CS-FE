@@ -1,26 +1,45 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import AppLayout from '../../components/layout/AppLayout.jsx';
+import { 
+  fetchTaskDetail, 
+  submitTaskAction, 
+  selectCurrentTask, 
+  selectTasksLoading 
+} from '../../store/slices/tasksSlice.js';
 import api from '../../lib/api.js';
+import TaskDiscussion from '../../components/tasks/TaskDiscussion.jsx';
 
 const GITHUB_REGEX = /^https:\/\/github\.com\/[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+/;
 
 export default function StudentTaskDetail() {
   const { id } = useParams();
-  const [task, setTask] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  const task = useSelector(selectCurrentTask);
+  const loading = useSelector(selectTasksLoading);
+  
   const [githubUrl, setGithubUrl] = useState('');
   const [description, setDescription] = useState('');
   const [urlError, setUrlError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [chatOpen, setChatOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    api.get(`/api/tasks/${id}`)
-      .then(r => setTask(r.data))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [id]);
+    dispatch(fetchTaskDetail(id));
+
+    const fetchUnread = () => {
+      api.get(`/api/tasks/${id}/unread-counts`)
+        .then(r => setUnreadCount(r.data.count || 0))
+        .catch(() => {});
+    };
+
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 10000);
+    return () => clearInterval(interval);
+  }, [id, dispatch]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -34,14 +53,13 @@ export default function StudentTaskDetail() {
 
     setSubmitting(true);
     try {
-      const { data } = await api.post('/api/submissions', {
-        task_id: id,
-        github_url: githubUrl,
+      await dispatch(submitTaskAction({
+        taskId: id,
+        githubUrl,
         description,
-      });
-      setTask(t => ({ ...t, submission: data }));
+      })).unwrap();
     } catch (err) {
-      setSubmitError(err.response?.data?.error || 'Submission failed. Try again.');
+      setSubmitError(err || 'Submission failed. Try again.');
     } finally {
       setSubmitting(false);
     }
@@ -88,12 +106,39 @@ export default function StudentTaskDetail() {
             {submission?.is_late && <span className="badge badge-late">Late submission</span>}
             {overdue && <span className="badge badge-late">Overdue</span>}
           </div>
-          <p className={`text-xs font-body mb-4 ${overdue ? 'text-red-400' : 'text-zinc-500'}`}>
-            Due {new Date(task.deadline).toLocaleString('en-US', {
-              weekday: 'long', month: 'long', day: 'numeric',
-              hour: '2-digit', minute: '2-digit',
-            })}
-          </p>
+          <div className="flex items-center gap-2 mb-4">
+            <p className={`text-xs font-body ${overdue ? 'text-red-400' : 'text-zinc-500'}`}>
+              Due {new Date(task.deadline).toLocaleString('en-US', {
+                weekday: 'long', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit',
+              })}
+            </p>
+            {task.created_by_name && (
+              <>
+                <span className="w-1 h-1 rounded-full bg-zinc-800" />
+                <p className="text-xs text-zinc-500 font-body">Mentor: {task.created_by_name}</p>
+              </>
+            )}
+          </div>
+          
+          {/* Discussion Trigger */}
+          <button 
+            onClick={() => { setChatOpen(true); setUnreadCount(0); }}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-2 border border-white/5 hover:border-accent/30 transition-all group mb-4"
+          >
+            <div className="relative">
+              <svg className="w-4 h-4 text-zinc-400 group-hover:text-accent transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              {unreadCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-accent text-black text-[9px] font-heading font-black flex items-center justify-center rounded-full animate-pulse ring-2 ring-black">
+                  {unreadCount}
+                </span>
+              )}
+            </div>
+            <span className="text-xs font-heading font-medium text-zinc-400 group-hover:text-white transition-colors">Discuss with Mentor</span>
+          </button>
+          
           <p className="text-zinc-400 font-body text-sm leading-relaxed">{task.description}</p>
         </div>
 
@@ -228,6 +273,22 @@ export default function StudentTaskDetail() {
           )}
         </div>
       </div>
+
+      {/* Discussion Sidebar */}
+      {chatOpen && (
+        <>
+          <div 
+            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm animate-fade-in lg:hidden"
+            onClick={() => setChatOpen(false)}
+          />
+          <div className="fixed top-0 right-0 bottom-0 z-50 w-full max-w-sm p-4 animate-slide-in-right">
+             <TaskDiscussion 
+               taskId={id} 
+               onClose={() => setChatOpen(false)} 
+             />
+          </div>
+        </>
+      )}
     </AppLayout>
   );
 }

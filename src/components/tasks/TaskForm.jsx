@@ -145,6 +145,7 @@ export default function TaskForm({ initial, onSubmit, onCancel, loading }) {
         />
       </div>
 
+
       {/* Reference image */}
       <div>
         <label className="label">Reference image <span className="text-zinc-600">(optional)</span></label>
